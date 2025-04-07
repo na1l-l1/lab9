@@ -2,9 +2,11 @@ package com.example.lab09;
 
 import android.content.BroadcastReceiver;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
@@ -87,3 +89,36 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
+    private void restoreState(Bundle savedInstanceState) {
+        isServiceRunning = savedInstanceState.getBoolean(KEY_IS_SERVICE_RUNNING, false);
+        String lastChar = savedInstanceState.getString(KEY_LAST_CHARACTER, "");
+
+        if (!lastChar.isEmpty()) {
+            randomCharacterTextView.setText(lastChar);
+        }
+
+        if (isServiceRunning) {
+            startService(serviceIntent);
+            updateStatusView(true);
+        }
+    }
+
+    private void updateStatusView(boolean isRunning) {
+        mainHandler.post(() -> {
+            statusTextView.setText(isRunning ? "Статус: работает" : "Статус: остановлен");
+            statusTextView.setTextColor(Color.parseColor(isRunning ? "#4CAF50" : "#F44336"));
+            startButton.setEnabled(!isRunning);
+            stopButton.setEnabled(isRunning);
+        });
+    }
+
+    private void updateCharacterWithAnimation(String character) {
+        Log.d(TAG, "Обновление символа: " + character);
+        mainHandler.post(() -> {
+            randomCharacterTextView.setText(character);
+            randomCharacterTextView.startAnimation(fadeInAnimation);
+            Log.d(TAG, "Текст после обновления: " + randomCharacterTextView.getText());
+        });
+    }
+}
