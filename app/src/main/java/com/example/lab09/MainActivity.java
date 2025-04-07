@@ -1,22 +1,17 @@
 package com.example.lab09;
 
 import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
-import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -66,4 +61,29 @@ public class MainActivity extends AppCompatActivity {
         stopButton = findViewById(R.id.button_end);
     }
 
-}
+    private void initAnimations() {
+        fadeInAnimation = AnimationUtils.loadAnimation(this, R.anim.fade_in);
+        buttonAnimation = AnimationUtils.loadAnimation(this, R.anim.button_press);
+    }
+
+    private void setupButtonAnimations() {
+        buttonAnimation.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+                // Do nothing
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                mainHandler.postDelayed(() -> {
+                    startButton.clearAnimation();
+                    stopButton.clearAnimation();
+                }, 50);
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+                // Do nothing
+            }
+        });
+    }
