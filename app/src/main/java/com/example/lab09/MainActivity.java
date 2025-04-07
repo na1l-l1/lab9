@@ -2,18 +2,20 @@ package com.example.lab09;
 
 import android.content.BroadcastReceiver;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
-
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -120,5 +122,46 @@ public class MainActivity extends AppCompatActivity {
             randomCharacterTextView.startAnimation(fadeInAnimation);
             Log.d(TAG, "Текст после обновления: " + randomCharacterTextView.getText());
         });
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean(KEY_IS_SERVICE_RUNNING, isServiceRunning);
+        outState.putString(KEY_LAST_CHARACTER, randomCharacterTextView.getText().toString());
+    }
+
+    public void onClick(View view) {
+        view.startAnimation(buttonAnimation);
+
+        int viewId = view.getId();
+        if (viewId == R.id.button_start) {
+            Log.d(TAG, "Нажата кнопка СТАРТ");
+            startService(serviceIntent);
+            isServiceRunning = true;
+            updateStatusView(true);
+        } else if (viewId == R.id.button_end) {
+            Log.d(TAG, "Нажата кнопка СТОП");
+            stopService(serviceIntent);
+            randomCharacterTextView.setText("?");
+            isServiceRunning = false;
+            updateStatusView(false);
+        }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        IntentFilter filter = new IntentFilter(RandomCharacterService.BROADCAST_ACTION);
+        LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver, filter);
+        updateStatusView(isServiceRunning);
+        Log.d(TAG, "BroadcastReceiver зарегистрирован");
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver);
+        Log.d(TAG, "BroadcastReceiver отменен");
     }
 }
