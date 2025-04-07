@@ -3,9 +3,13 @@ package com.example.lab09;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Looper;
 import android.util.Log;
 import android.widget.Toast;
+
+import androidx.annotation.Nullable;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import java.util.Random;
 
@@ -71,5 +75,39 @@ public class RandomCharacterService extends Service {
         }
 
         Log.d(TAG, "Генератор случайных букв остановлен");
+    }
+
+    private void sendCharacterBroadcast(char character) {
+        try {
+            Intent intent = new Intent(BROADCAST_ACTION);
+            intent.putExtra(EXTRA_CHAR, character);
+            LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
+            Log.d(TAG, "Отправлен символ: " + character);
+        } catch (Exception e) {
+            Log.e(TAG, "Ошибка при отправке broadcast", e);
+        }
+    }
+
+    private void stopRandomGenerator() {
+        Log.d(TAG, "Остановка генератора случайных букв");
+        isRandomGeneratorOn = false;
+
+        if (workerThread != null && workerThread.isAlive()) {
+            workerThread.interrupt();
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        stopRandomGenerator();
+        Toast.makeText(getApplicationContext(), "Сервис остановлен", Toast.LENGTH_SHORT).show();
+        Log.i(TAG, "Сервис уничтожен...");
+    }
+
+    @Nullable
+    @Override
+    public IBinder onBind(Intent intent) {
+        return null;
     }
 }

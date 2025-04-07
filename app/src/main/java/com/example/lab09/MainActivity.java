@@ -1,6 +1,7 @@
 package com.example.lab09;
 
 import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Color;
@@ -163,5 +164,19 @@ public class MainActivity extends AppCompatActivity {
         super.onStop();
         LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver);
         Log.d(TAG, "BroadcastReceiver отменен");
+    }
+
+    private class CharacterReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            try {
+                Log.d(TAG, "Получен broadcast");
+                char character = intent.getCharExtra(RandomCharacterService.EXTRA_CHAR, '?');
+                Log.d(TAG, "Полученный символ: " + character);
+                updateCharacterWithAnimation(String.valueOf(character));
+            } catch (Exception e) {
+                Log.e(TAG, "Ошибка в onReceive", e);
+            }
+        }
     }
 }
